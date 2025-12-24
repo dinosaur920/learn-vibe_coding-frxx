@@ -2,6 +2,7 @@
 export {}
 declare global {
   const BASE_CULTIVATION_PER_SECOND: typeof import('../../utils/gameConstants').BASE_CULTIVATION_PER_SECOND
+  const MAX_REALM: typeof import('../../utils/gameConstants').MAX_REALM
   const Realm: typeof import('../../utils/gameConstants').Realm
   const SpiritRoot: typeof import('../../utils/gameConstants').SpiritRoot
   const abortNavigation: typeof import('../../node_modules/nuxt/dist/app/composables/router').abortNavigation
@@ -58,6 +59,7 @@ declare global {
   const getAppManifest: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getAppManifest
   const getCurrentInstance: typeof import('../../node_modules/vue').getCurrentInstance
   const getCurrentScope: typeof import('../../node_modules/vue').getCurrentScope
+  const getNextRealm: typeof import('../../utils/gameConstants').getNextRealm
   const getRandomSpiritRoot: typeof import('../../utils/gameConstants').getRandomSpiritRoot
   const getRealmLabel: typeof import('../../utils/gameConstants').getRealmLabel
   const getRealmMaxCultivation: typeof import('../../utils/gameConstants').getRealmMaxCultivation
@@ -443,6 +445,7 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface ComponentCustomProperties {
     readonly BASE_CULTIVATION_PER_SECOND: UnwrapRef<typeof import('../../utils/gameConstants')['BASE_CULTIVATION_PER_SECOND']>
+    readonly MAX_REALM: UnwrapRef<typeof import('../../utils/gameConstants')['MAX_REALM']>
     readonly Realm: UnwrapRef<typeof import('../../utils/gameConstants')['Realm']>
     readonly SpiritRoot: UnwrapRef<typeof import('../../utils/gameConstants')['SpiritRoot']>
     readonly abortNavigation: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['abortNavigation']>
@@ -499,6 +502,7 @@ declare module 'vue' {
     readonly getAppManifest: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']>
     readonly getCurrentInstance: UnwrapRef<typeof import('../../node_modules/vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('../../node_modules/vue')['getCurrentScope']>
+    readonly getNextRealm: UnwrapRef<typeof import('../../utils/gameConstants')['getNextRealm']>
     readonly getRandomSpiritRoot: UnwrapRef<typeof import('../../utils/gameConstants')['getRandomSpiritRoot']>
     readonly getRealmLabel: UnwrapRef<typeof import('../../utils/gameConstants')['getRealmLabel']>
     readonly getRealmMaxCultivation: UnwrapRef<typeof import('../../utils/gameConstants')['getRealmMaxCultivation']>

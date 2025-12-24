@@ -27,6 +27,32 @@ export enum SpiritRoot {
   MUTANT = "MUTANT",
 }
 
+const orderedRealms: Realm[] = [
+  Realm.QI_1,
+  Realm.QI_2,
+  Realm.QI_3,
+  Realm.QI_4,
+  Realm.QI_5,
+  Realm.QI_6,
+  Realm.QI_7,
+  Realm.QI_8,
+  Realm.QI_9,
+  Realm.QI_10,
+];
+
+export const MAX_REALM = Realm.QI_10;
+
+export function getNextRealm(realm: Realm): Realm | null {
+  const index = orderedRealms.indexOf(realm);
+  if (index === -1) {
+    return null;
+  }
+  if (index >= orderedRealms.length - 1) {
+    return null;
+  }
+  return orderedRealms[index + 1];
+}
+
 const realmConfigs: Record<Realm, RealmConfig> = {
   QI_1: {
     maxCultivation: 100,
@@ -109,7 +135,7 @@ const spiritRootMultipliers: Record<SpiritRoot, number> = {
   FAKE: 0.7,
   TRUE: 1,
   HEAVEN: 1.3,
-  MUTANT: 1.1
+  MUTANT: 1.1,
 };
 
 const realmMultipliers: Record<Realm, number> = {
@@ -122,7 +148,7 @@ const realmMultipliers: Record<Realm, number> = {
   QI_7: 1.3,
   QI_8: 1.35,
   QI_9: 1.4,
-  QI_10: 1.45
+  QI_10: 1.45,
 };
 
 export function getSpiritRootMultiplier(spiritRoot: SpiritRoot) {

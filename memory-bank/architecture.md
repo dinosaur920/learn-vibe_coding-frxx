@@ -65,7 +65,9 @@
   - 当前功能：
     - 展示玩家基础信息：道号、境界（`realmLabel`）、灵根（`spiritRootLabel`）。
     - 展示修为进度条：基于 `cultivation / maxCultivation` 计算 `van-progress` 百分比。
+    - 展示实时修炼速度：基于 `Realm`、`SpiritRoot` 与 `calculateCultivationGainPerSecond` 计算当前每秒修为增长值，并在面板中以“修炼速度 X / 秒”显示。
     - 提供“打坐修炼”按钮：点击时调用玩家 Store 的 `cultivate` 动作，对接后端修炼结算 API。
+    - 提供“突破”按钮：在修为达到当前境界上限时可用，点击后调用突破 API，提升境界并重置修为上限。
     - 提供“开始挂机 / 暂停挂机”按钮：使用 `useIntervalFn` 每秒轮询一次修炼接口，模拟挂机修炼。
     - 未登录时显示引导文案及跳转按钮，指向 `/login`。
 
@@ -173,8 +175,8 @@
     - `server/api/user/login.post.ts`：登录与 JWT 签发。
     - `server/api/user/profile.get.ts`：获取当前登录玩家信息。
     - `server/api/game/cultivate.post.ts`：修炼结算（挂机 Tick），提供挂机与离线修炼的后端结算能力。
+    - `server/api/game/breakthrough.post.ts`：境界突破，在当前修为圆满时提升境界并重置修为上限。
   - 未来待实现（后续阶段）：
-    - `server/api/game/breakthrough.post.ts`：境界突破。
     - `server/api/cave/*.ts`：洞府状态查询、种植、收获。
     - `server/api/inventory/*.ts`：行囊物品查询与更新。
 

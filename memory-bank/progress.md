@@ -44,6 +44,21 @@
   - 展示玩家基础信息（道号、境界、灵根）和修为进度条（基于 `cultivation / maxCultivation`）。
   - 提供“打坐修炼”按钮，手动触发一次修炼结算。
   - 使用 `useIntervalFn` 实现挂机修炼开关，每秒自动调用一次修炼接口，并在组件卸载时停止轮询。  
+  - 在同一面板中展示当前修炼速度：基于玩家当前境界与灵根，使用 `calculateCultivationGainPerSecond` 计算每秒修为增长值，并以“修炼速度 X / 秒”的形式展示给玩家。  
 - 通过实际页面操作完成第三阶段功能验证：
   - 注册/登录后进入首页，可以看到修为随“打坐修炼”与挂机开关稳定增长。
   - 多次刷新页面与重新登录，修为数值保持一致，且长时间不登录后再次进入时，会在首次结算时一次补算离线期间修为。
+
+## 2025-12-24 - 第四阶段：境界突破系统
+
+- 扩展数值配置：在 `utils/gameConstants.ts` 中引入有序境界列表与 `MAX_REALM`，并提供 `getNextRealm` 帮助后端根据当前境界获取下一阶以及判断是否已达版本上限。  
+- 实现境界突破后端 API：`server/api/game/breakthrough.post.ts`：
+  - 通过 JWT 解析当前用户，校验登录状态与用户存在性。
+  - 校验当前是否已达最高境界，若是则返回 `BREAKTHROUGH_MAX_REALM` 错误。
+  - 校验修为是否达到当前 `maxCultivation`，未圆满时返回 `BREAKTHROUGH_CULTIVATION_NOT_ENOUGH` 错误。
+  - 在当前版本中突破成功率为 100%，成功后将境界提升至下一阶，更新 `realmLabel`、重置 `cultivation` 并根据新境界刷新 `maxCultivation`，同时更新 `lastCultivateAt`。  
+- 扩展玩家 Store：在 `stores/player.ts` 中新增 `breakthrough` 动作：
+  - 调用 `/api/game/breakthrough`，按统一成功/错误结构更新 `playerInfo`，在未授权时清空本地状态并让前端回到登录流程。  
+- 升级首页修炼面板 UI：`pages/index.vue`：
+  - 在修为信息卡片下方新增“突破”按钮，仅当 `cultivation >= maxCultivation` 时可用。
+  - 点击按钮时调用 `playerStore.breakthrough`，成功后通过 `showToast` 提示“突破成功！”，并观察境界文字变化与修为进度条归零，失败或条件不足时展示后端返回的中文错误文案。  

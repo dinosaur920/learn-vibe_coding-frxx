@@ -28,11 +28,21 @@
         </span>
       </div>
       <van-progress :percentage="progressPercent" :show-pivot="false" />
+      <div class="row">
+        <span class="label">修炼速度</span>
+        <span class="value">
+          {{ cultivationSpeed.toFixed(2) }} / 秒
+        </span>
+      </div>
     </div>
 
     <div v-if="playerInfo" class="actions">
       <van-button type="primary" round block :loading="cultivating" @click="onCultivateOnce">
         打坐修炼
+      </van-button>
+      <van-button type="success" round block :loading="breakingThrough" :disabled="!canBreakthrough"
+        @click="onBreakthrough">
+        突破
       </van-button>
       <van-button type="default" round block @click="toggleAutoCultivate">
         {{ autoCultivate ? "暂停挂机" : "开始挂机" }}
@@ -57,12 +67,14 @@ import { useRouter } from "vue-router"
 import { showToast } from "vant"
 import { useIntervalFn } from "@vueuse/core"
 import { usePlayerStore } from "~/stores/player"
+import { calculateCultivationGainPerSecond, Realm, SpiritRoot } from "~/utils/gameConstants"
 
 const router = useRouter()
 const playerStore = usePlayerStore()
 
 const cultivating = ref(false)
 const autoCultivate = ref(true)
+const breakingThrough = ref(false)
 
 const playerInfo = computed(() => playerStore.playerInfo)
 
@@ -78,6 +90,25 @@ const progressPercent = computed(() => {
     return 100
   }
   return Math.floor(value)
+})
+
+const cultivationSpeed = computed(() => {
+  if (!playerInfo.value) {
+    return 0
+  }
+  const realm = playerInfo.value.realm as Realm
+  const spiritRoot = playerInfo.value.spiritRoot as SpiritRoot
+  return calculateCultivationGainPerSecond(spiritRoot, realm)
+})
+
+const canBreakthrough = computed(() => {
+  if (!playerInfo.value) {
+    return false
+  }
+  if (playerInfo.value.maxCultivation <= 0) {
+    return false
+  }
+  return playerInfo.value.cultivation >= playerInfo.value.maxCultivation
 })
 
 const runCultivate = async () => {
@@ -109,6 +140,34 @@ const onCultivateOnce = async () => {
     await runCultivate()
   } finally {
     cultivating.value = false
+  }
+}
+
+const onBreakthrough = async () => {
+  if (!playerInfo.value) {
+    showToast("请先登录")
+    router.push("/login")
+    return
+  }
+  if (!canBreakthrough.value) {
+    showToast("当前修为尚未圆满")
+    return
+  }
+  if (breakingThrough.value) {
+    return
+  }
+  if (typeof (playerStore as any).breakthrough !== "function") {
+    return
+  }
+  breakingThrough.value = true
+  try {
+    await playerStore.breakthrough()
+    showToast("突破成功！")
+  } catch (error: any) {
+    const message = error?.message || "突破失败，请稍后重试"
+    showToast(message)
+  } finally {
+    breakingThrough.value = false
   }
 }
 

@@ -1454,22 +1454,7 @@ const plugins = [
 _s0TSjk9v3jkQUxoLSVeNgXAB6NB2fYnsUuiIE_dt2A
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"17d3d-O1/6i2S/5mxQkjtqAW2kxnSYNA4\"",
-    "mtime": "2025-12-24T07:18:32.468Z",
-    "size": 97597,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"5c074-2GMMi06PJRjxB3XYrjcT7wT93I0\"",
-    "mtime": "2025-12-24T07:18:32.468Z",
-    "size": 376948,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -1879,6 +1864,7 @@ async function getIslandContext(event) {
   return ctx;
 }
 
+const _lazy_YkBzwi = () => Promise.resolve().then(function () { return breakthrough_post$1; });
 const _lazy_0ZhrCi = () => Promise.resolve().then(function () { return cultivate_post$1; });
 const _lazy_sUIvGF = () => Promise.resolve().then(function () { return login_post$1; });
 const _lazy_za58kY = () => Promise.resolve().then(function () { return profile_get$1; });
@@ -1887,6 +1873,7 @@ const _lazy_V85mOn = () => Promise.resolve().then(function () { return renderer$
 
 const handlers = [
   { route: '', handler: _Ok3CW6, lazy: false, middleware: true, method: undefined },
+  { route: '/api/game/breakthrough', handler: _lazy_YkBzwi, lazy: true, middleware: false, method: "post" },
   { route: '/api/game/cultivate', handler: _lazy_0ZhrCi, lazy: true, middleware: false, method: "post" },
   { route: '/api/user/login', handler: _lazy_sUIvGF, lazy: true, middleware: false, method: "post" },
   { route: '/api/user/profile', handler: _lazy_za58kY, lazy: true, middleware: false, method: "get" },
@@ -2310,6 +2297,29 @@ var SpiritRoot = /* @__PURE__ */ ((SpiritRoot2) => {
   SpiritRoot2["MUTANT"] = "MUTANT";
   return SpiritRoot2;
 })(SpiritRoot || {});
+const orderedRealms = [
+  "QI_1" /* QI_1 */,
+  "QI_2" /* QI_2 */,
+  "QI_3" /* QI_3 */,
+  "QI_4" /* QI_4 */,
+  "QI_5" /* QI_5 */,
+  "QI_6" /* QI_6 */,
+  "QI_7" /* QI_7 */,
+  "QI_8" /* QI_8 */,
+  "QI_9" /* QI_9 */,
+  "QI_10" /* QI_10 */
+];
+const MAX_REALM = "QI_10" /* QI_10 */;
+function getNextRealm(realm) {
+  const index = orderedRealms.indexOf(realm);
+  if (index === -1) {
+    return null;
+  }
+  if (index >= orderedRealms.length - 1) {
+    return null;
+  }
+  return orderedRealms[index + 1];
+}
 const realmConfigs = {
   QI_1: {
     maxCultivation: 100,
@@ -2407,6 +2417,101 @@ function getRealmMultiplier(realm) {
   var _a;
   return (_a = realmMultipliers[realm]) != null ? _a : 1;
 }
+
+function sanitizeUser$4(user) {
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    realm: user.realm,
+    realmLabel: user.realmLabel,
+    cultivation: user.cultivation,
+    maxCultivation: user.maxCultivation,
+    spiritRoot: user.spiritRoot,
+    spiritRootLabel: user.spiritRootLabel
+  };
+}
+function toRealm$1(value) {
+  const realmValues = Object.values(Realm);
+  if (realmValues.includes(value)) {
+    return value;
+  }
+  return null;
+}
+const breakthrough_post = defineEventHandler(async (event) => {
+  var _a;
+  try {
+    const token = getTokenFromRequest(event);
+    if (!token) {
+      setResponseStatus(event, 401);
+      return createErrorResponse("AUTH_UNAUTHORIZED", "\u8BF7\u5148\u767B\u5F55");
+    }
+    const payload = verifyAuthToken(token);
+    if (!payload || !payload.userId) {
+      setResponseStatus(event, 401);
+      return createErrorResponse(
+        "AUTH_UNAUTHORIZED",
+        "\u767B\u5F55\u72B6\u6001\u5DF2\u5931\u6548\uFF0C\u8BF7\u91CD\u65B0\u767B\u5F55"
+      );
+    }
+    const user = await prisma.user.findUnique({
+      where: {
+        id: payload.userId
+      }
+    });
+    if (!user) {
+      setResponseStatus(event, 404);
+      return createErrorResponse("USER_NOT_FOUND", "\u7528\u6237\u4E0D\u5B58\u5728");
+    }
+    const realm = (_a = toRealm$1(user.realm)) != null ? _a : Realm.QI_1;
+    if (realm === MAX_REALM) {
+      setResponseStatus(event, 400);
+      return createErrorResponse(
+        "BREAKTHROUGH_MAX_REALM",
+        "\u5DF2\u8FBE\u5F53\u524D\u7248\u672C\u6700\u9AD8\u5883\u754C"
+      );
+    }
+    if (user.cultivation < user.maxCultivation) {
+      setResponseStatus(event, 400);
+      return createErrorResponse(
+        "BREAKTHROUGH_CULTIVATION_NOT_ENOUGH",
+        "\u5F53\u524D\u4FEE\u4E3A\u5C1A\u672A\u5706\u6EE1"
+      );
+    }
+    const nextRealm = getNextRealm(realm);
+    if (!nextRealm) {
+      setResponseStatus(event, 400);
+      return createErrorResponse(
+        "BREAKTHROUGH_MAX_REALM",
+        "\u5DF2\u8FBE\u5F53\u524D\u7248\u672C\u6700\u9AD8\u5883\u754C"
+      );
+    }
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        realm: nextRealm,
+        realmLabel: getRealmLabel(nextRealm),
+        cultivation: 0,
+        maxCultivation: getRealmMaxCultivation(nextRealm),
+        lastCultivateAt: /* @__PURE__ */ new Date()
+      }
+    });
+    return createSuccessResponse(sanitizeUser$4(updatedUser));
+  } catch (error) {
+    setResponseStatus(event, 500);
+    return createErrorResponse(
+      "INTERNAL_SERVER_ERROR",
+      "\u670D\u52A1\u5668\u5F00\u5C0F\u5DEE\u4E86\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5"
+    );
+  }
+});
+
+const breakthrough_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: breakthrough_post
+}, Symbol.toStringTag, { value: 'Module' }));
 
 function sanitizeUser$3(user) {
   return {
