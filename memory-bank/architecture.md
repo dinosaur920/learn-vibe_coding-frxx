@@ -99,9 +99,17 @@
       - `cultivation` / `maxCultivation`：当前修为值及其上限。
       - `lastCultivateAt`：上次修炼结算时间。
       - `createdAt` / `updatedAt`：通用审计时间戳。
+      - `plots`：与洞府药园地块 `CavePlot` 的一对多关系。
+    - `model CavePlot`：
+      - `userId` / `user`：所属玩家外键关系，玩家删除时级联清理地块。
+      - `slotIndex`：玩家药园中的地块序号，从 0 开始递增。
+      - `status`：地块状态字符串，约定为 `EMPTY` / `GROWING` / `READY`。
+      - `herbId`：当前种植灵草的标识，用于与灵草配置表关联。
+      - `plantedAt`：种下时间，结合配置中的成熟时长计算是否可收获。
+      - 复合唯一索引 `@@unique([userId, slotIndex])`，保证同一玩家同一地块只保留一条记录。
   - 角色：
     - 作为所有领域模型（User、洞府、行囊等）的单一事实来源。
-    - 当前已完成 User 模型的定义与数据库同步，为后续修炼、突破与洞府功能提供统一用户数据基础。
+    - 当前已完成 User 与 CavePlot 模型的定义与数据库同步，为修炼、突破与洞府药园功能提供统一用户数据基础。
 
 ## 5. 后端通用工具与 API 层
 
@@ -128,6 +136,7 @@
     - 校验用户名与密码必填。
     - 检查用户名唯一性，冲突时返回 `AUTH_USERNAME_TAKEN`。
     - 生成密码哈希，随机分配灵根（基于 `utils/gameConstants.ts`），初始化境界为炼气一层，设置修为与上限，并记录 `lastCultivateAt`。
+    - 在用户创建成功后，为该玩家初始化固定数量（当前为 4 块）的洞府药园地块记录，全部置为 `EMPTY` 空置状态。
   - 返回不包含密码哈希的脱敏用户信息。
 
 - `server/api/user/login.post.ts`
@@ -151,6 +160,24 @@
     - 更新数据库中的 `cultivation` 和 `lastCultivateAt`，返回更新后的玩家状态。
   - 特点：
     - 不依赖后台定时任务，采用“按需结算 + 离线补算”的方式，在玩家触发修炼接口时一次性结算离线期间修为。
+
+- `server/api/game/breakthrough.post.ts`
+  - 负责境界突破：
+    - 校验玩家是否已达当前版本最高境界，若是则返回 `BREAKTHROUGH_MAX_REALM`。
+    - 校验修为是否达到 `maxCultivation`，未圆满时返回 `BREAKTHROUGH_CULTIVATION_NOT_ENOUGH`。
+    - 突破成功时提升境界、刷新中文 `realmLabel`、重置修为并基于新境界更新 `maxCultivation` 与 `lastCultivateAt`。
+
+- 洞府相关 API：
+  - `server/api/cave/status.get.ts`：
+    - 通过 JWT 获取当前玩家，查询其全部 `CavePlot` 地块并按 `slotIndex` 排序返回。
+    - 若该玩家尚无地块记录，懒初始化 4 条空置地块数据后再返回。
+    - 结合灵草配置计算每块地的预计成熟时间与是否成熟标记。
+  - `server/api/cave/plant.post.ts`：
+    - 接收 `slotIndex` 与 `herbId`，校验地块归属与当前状态为 `EMPTY`，并校验灵草标识合法。
+    - 将地块状态更新为 `GROWING`，记录 `herbId` 与 `plantedAt`。
+  - `server/api/cave/harvest.post.ts`：
+    - 校验地块存在且不为空置，基于 `plantedAt + 成熟秒数` 判断是否可收获。
+    - 可收获时重置地块为 `EMPTY` 并清空种植信息，返回本次收获的灵草标识与名称。
 
 ## 6. 状态管理层
 
@@ -198,7 +225,12 @@
     - 辅助函数：
       - `getSpiritRootMultiplier` / `getRealmMultiplier`：按枚举获取对应系数。
       - `calculateCultivationGainPerSecond`：基于基础速度与两类系数计算单位时间修为增量。
+    - 洞府灵草配置：
+      - `HerbId` 与 `HerbRarity` 枚举，用于约束灵草标识与品阶（凡品 / 上品 / 极品）。
+      - 多个基础灵草（如灵草·青芽、灵花·翠蕊、灵藤·碧络、灵果·丹霞、幽兰·紫霄、灵莲·青灵）的成熟时长与品阶配置。
+      - `BASIC_HERB_IDS`：当前可种植灵草 ID 列表。
+      - `getHerbConfig` / `getHerbConfigById`：按 ID 获取灵草配置及其成熟秒数、中文名与品阶标签。
   - 未来扩展：
-    - 洞府灵草配置（成熟时间、物品 ID、物品类型等）。
+    - 行囊物品配置（物品类型、物品 ID、堆叠上限等）。
 
 随着后续阶段推进，本文件将继续扩充每个新增模块的职责说明，以及它们之间的调用关系与数据流向。  

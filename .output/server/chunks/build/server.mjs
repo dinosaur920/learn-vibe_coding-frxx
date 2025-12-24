@@ -387,19 +387,24 @@ async function getRouteRules(arg) {
 }
 const _routes = [
   {
+    name: "cave",
+    path: "/cave",
+    component: () => import('./cave-B-HOdBvT.mjs')
+  },
+  {
     name: "index",
     path: "/",
-    component: () => import('./index-cd53yhYW.mjs')
+    component: () => import('./index-By0J7HVx.mjs')
   },
   {
     name: "login",
     path: "/login",
-    component: () => import('./login-Bi2ix7VD.mjs')
+    component: () => import('./login-9GVjQIWQ.mjs')
   },
   {
     name: "register",
     path: "/register",
-    component: () => import('./register-CBvxnhJ0.mjs')
+    component: () => import('./register-Cfj2UYJh.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1180,7 +1185,7 @@ const plugins = [
   components_plugin_z4hgvsiddfKkfXTP6M8M4zG5Cb7sGnDhcryKVM45Di4
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-C4fbohkQ.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-3LEFQt-Q.mjs').then((m) => m.default || m))
 };
 const LayoutLoader = defineComponent({
   name: "LayoutLoader",
@@ -1519,5 +1524,5 @@ let entry;
 }
 const entry_default = (ssrContext) => entry(ssrContext);
 
-export { _export_sfc as _, useNuxtApp as a, useRuntimeConfig as b, nuxtLinkDefaults as c, asyncDataDefaults as d, entry_default as default, createError as e, fetchDefaults as f, useRequestFetch as g, defineStore as h, navigateTo as n, resolveRouteObject as r, tryUseNuxtApp as t, useRouter as u };
+export { _export_sfc as _, useNuxtApp as a, useRuntimeConfig as b, nuxtLinkDefaults as c, defineStore as d, entry_default as default, asyncDataDefaults as e, createError as f, fetchDefaults as g, useRequestFetch as h, navigateTo as n, resolveRouteObject as r, tryUseNuxtApp as t, useRouter as u };
 //# sourceMappingURL=server.mjs.map

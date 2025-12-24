@@ -3,6 +3,15 @@ import type { Serialize, Simplify } from "nitropack/types";
 declare module "nitropack/types" {
   type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T
   interface InternalApi {
+    '/api/cave/harvest': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/cave/harvest.post').default>>>>
+    }
+    '/api/cave/plant': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/cave/plant.post').default>>>>
+    }
+    '/api/cave/status': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/cave/status.get').default>>>>
+    }
     '/api/game/breakthrough': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/game/breakthrough.post').default>>>>
     }

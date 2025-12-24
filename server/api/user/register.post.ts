@@ -6,6 +6,7 @@ import {
 } from "~/server/utils/response";
 import {
   Realm,
+  CavePlotStatus,
   getRealmLabel,
   getRealmMaxCultivation,
   getRandomSpiritRoot,
@@ -74,6 +75,17 @@ export default defineEventHandler(async (event) => {
         spiritRootLabel,
         lastCultivateAt: new Date(),
       },
+    });
+
+    const plotCount = 4;
+    const plotsData = Array.from({ length: plotCount }).map((_, index) => ({
+      userId: user.id,
+      slotIndex: index,
+      status: CavePlotStatus.EMPTY,
+    }));
+
+    await prisma.cavePlot.createMany({
+      data: plotsData,
     });
 
     setResponseStatus(event, 201);

@@ -11,17 +11,31 @@ datasource db {
 }
 
 model User {
-  id              Int      @id @default(autoincrement())
-  username        String   @unique
+  id              Int        @id @default(autoincrement())
+  username        String     @unique
   passwordHash    String
-  email           String?  @unique
+  email           String?    @unique
   realm           String
   realmLabel      String
-  cultivation     Int      @default(0)
+  cultivation     Int        @default(0)
   maxCultivation  Int
   spiritRoot      String
   spiritRootLabel String
   lastCultivateAt DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  plots           CavePlot[]
+}
+
+model CavePlot {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slotIndex Int
+  status    String   @default("EMPTY")
+  herbId    String?
+  plantedAt DateTime?
+
+  @@index([userId])
+  @@unique([userId, slotIndex])
 }

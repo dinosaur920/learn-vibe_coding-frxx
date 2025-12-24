@@ -1,6 +1,6 @@
 import { c as defineEventHandler, r as readBody, e as setResponseStatus } from '../../../_/nitro.mjs';
 import { c as createErrorResponse, p as prisma, h as hashPassword, a as createSuccessResponse } from '../../../_/auth.mjs';
-import { R as Realm, e as getRandomSpiritRoot, b as getRealmLabel, a as getRealmMaxCultivation, f as getSpiritRootLabel } from '../../../_/gameConstants.mjs';
+import { R as Realm, f as getRandomSpiritRoot, c as getRealmLabel, b as getRealmMaxCultivation, h as getSpiritRootLabel, C as CavePlotStatus } from '../../../_/gameConstants.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -63,6 +63,15 @@ const register_post = defineEventHandler(async (event) => {
         spiritRootLabel,
         lastCultivateAt: /* @__PURE__ */ new Date()
       }
+    });
+    const plotCount = 4;
+    const plotsData = Array.from({ length: plotCount }).map((_, index) => ({
+      userId: user.id,
+      slotIndex: index,
+      status: CavePlotStatus.EMPTY
+    }));
+    await prisma.cavePlot.createMany({
+      data: plotsData
     });
     setResponseStatus(event, 201);
     return createSuccessResponse(sanitizeUser(user));

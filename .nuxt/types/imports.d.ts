@@ -2,6 +2,10 @@
 export {}
 declare global {
   const BASE_CULTIVATION_PER_SECOND: typeof import('../../utils/gameConstants').BASE_CULTIVATION_PER_SECOND
+  const BASIC_HERB_IDS: typeof import('../../utils/gameConstants').BASIC_HERB_IDS
+  const CavePlotStatus: typeof import('../../utils/gameConstants').CavePlotStatus
+  const HerbId: typeof import('../../utils/gameConstants').HerbId
+  const HerbRarity: typeof import('../../utils/gameConstants').HerbRarity
   const MAX_REALM: typeof import('../../utils/gameConstants').MAX_REALM
   const Realm: typeof import('../../utils/gameConstants').Realm
   const SpiritRoot: typeof import('../../utils/gameConstants').SpiritRoot
@@ -59,6 +63,8 @@ declare global {
   const getAppManifest: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getAppManifest
   const getCurrentInstance: typeof import('../../node_modules/vue').getCurrentInstance
   const getCurrentScope: typeof import('../../node_modules/vue').getCurrentScope
+  const getHerbConfig: typeof import('../../utils/gameConstants').getHerbConfig
+  const getHerbConfigById: typeof import('../../utils/gameConstants').getHerbConfigById
   const getNextRealm: typeof import('../../utils/gameConstants').getNextRealm
   const getRandomSpiritRoot: typeof import('../../utils/gameConstants').getRandomSpiritRoot
   const getRealmLabel: typeof import('../../utils/gameConstants').getRealmLabel
@@ -286,7 +292,6 @@ declare global {
   const useNow: typeof import('@vueuse/core').useNow
   const useNuxtApp: typeof import('../../node_modules/nuxt/dist/app/nuxt').useNuxtApp
   const useNuxtData: typeof import('../../node_modules/nuxt/dist/app/composables/asyncData').useNuxtData
-  const useNuxtDevTools: typeof import('../../node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools').useNuxtDevTools
   const useObjectUrl: typeof import('@vueuse/core').useObjectUrl
   const useOffsetPagination: typeof import('@vueuse/core').useOffsetPagination
   const useOnline: typeof import('@vueuse/core').useOnline
@@ -434,7 +439,7 @@ declare global {
   export type { Component, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from '../../node_modules/vue'
   import('../../node_modules/vue')
   // @ts-ignore
-  export type { Realm, SpiritRoot } from '../../utils/gameConstants'
+  export type { Realm, SpiritRoot, CavePlotStatus, HerbId, HerbRarity } from '../../utils/gameConstants'
   import('../../utils/gameConstants')
   // @ts-ignore
   export type { PlayerInfo } from '../../stores/player'
@@ -445,6 +450,10 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface ComponentCustomProperties {
     readonly BASE_CULTIVATION_PER_SECOND: UnwrapRef<typeof import('../../utils/gameConstants')['BASE_CULTIVATION_PER_SECOND']>
+    readonly BASIC_HERB_IDS: UnwrapRef<typeof import('../../utils/gameConstants')['BASIC_HERB_IDS']>
+    readonly CavePlotStatus: UnwrapRef<typeof import('../../utils/gameConstants')['CavePlotStatus']>
+    readonly HerbId: UnwrapRef<typeof import('../../utils/gameConstants')['HerbId']>
+    readonly HerbRarity: UnwrapRef<typeof import('../../utils/gameConstants')['HerbRarity']>
     readonly MAX_REALM: UnwrapRef<typeof import('../../utils/gameConstants')['MAX_REALM']>
     readonly Realm: UnwrapRef<typeof import('../../utils/gameConstants')['Realm']>
     readonly SpiritRoot: UnwrapRef<typeof import('../../utils/gameConstants')['SpiritRoot']>
@@ -502,6 +511,8 @@ declare module 'vue' {
     readonly getAppManifest: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']>
     readonly getCurrentInstance: UnwrapRef<typeof import('../../node_modules/vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('../../node_modules/vue')['getCurrentScope']>
+    readonly getHerbConfig: UnwrapRef<typeof import('../../utils/gameConstants')['getHerbConfig']>
+    readonly getHerbConfigById: UnwrapRef<typeof import('../../utils/gameConstants')['getHerbConfigById']>
     readonly getNextRealm: UnwrapRef<typeof import('../../utils/gameConstants')['getNextRealm']>
     readonly getRandomSpiritRoot: UnwrapRef<typeof import('../../utils/gameConstants')['getRandomSpiritRoot']>
     readonly getRealmLabel: UnwrapRef<typeof import('../../utils/gameConstants')['getRealmLabel']>
@@ -729,7 +740,6 @@ declare module 'vue' {
     readonly useNow: UnwrapRef<typeof import('@vueuse/core')['useNow']>
     readonly useNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/nuxt')['useNuxtApp']>
     readonly useNuxtData: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/asyncData')['useNuxtData']>
-    readonly useNuxtDevTools: UnwrapRef<typeof import('../../node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools')['useNuxtDevTools']>
     readonly useObjectUrl: UnwrapRef<typeof import('@vueuse/core')['useObjectUrl']>
     readonly useOffsetPagination: UnwrapRef<typeof import('@vueuse/core')['useOffsetPagination']>
     readonly useOnline: UnwrapRef<typeof import('@vueuse/core')['useOnline']>

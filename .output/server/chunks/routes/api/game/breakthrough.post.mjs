@@ -1,6 +1,6 @@
 import { c as defineEventHandler, e as setResponseStatus } from '../../../_/nitro.mjs';
 import { g as getTokenFromRequest, c as createErrorResponse, v as verifyAuthToken, p as prisma, a as createSuccessResponse } from '../../../_/auth.mjs';
-import { R as Realm, M as MAX_REALM, g as getNextRealm, a as getRealmMaxCultivation, b as getRealmLabel } from '../../../_/gameConstants.mjs';
+import { R as Realm, M as MAX_REALM, a as getNextRealm, b as getRealmMaxCultivation, c as getRealmLabel } from '../../../_/gameConstants.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';

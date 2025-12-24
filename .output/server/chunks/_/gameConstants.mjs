@@ -138,6 +138,73 @@ function getRealmMultiplier(realm) {
   var _a;
   return (_a = realmMultipliers[realm]) != null ? _a : 1;
 }
+var CavePlotStatus = /* @__PURE__ */ ((CavePlotStatus2) => {
+  CavePlotStatus2["EMPTY"] = "EMPTY";
+  CavePlotStatus2["GROWING"] = "GROWING";
+  CavePlotStatus2["READY"] = "READY";
+  return CavePlotStatus2;
+})(CavePlotStatus || {});
+var HerbId = /* @__PURE__ */ ((HerbId2) => {
+  HerbId2["SPIRIT_GRASS"] = "SPIRIT_GRASS";
+  HerbId2["SPIRIT_FLOWER"] = "SPIRIT_FLOWER";
+  HerbId2["SPIRIT_VINE"] = "SPIRIT_VINE";
+  HerbId2["SPIRIT_FRUIT"] = "SPIRIT_FRUIT";
+  HerbId2["SPIRIT_ORCHID"] = "SPIRIT_ORCHID";
+  HerbId2["SPIRIT_LOTUS"] = "SPIRIT_LOTUS";
+  return HerbId2;
+})(HerbId || {});
+const herbConfigs = {
+  ["SPIRIT_GRASS" /* SPIRIT_GRASS */]: {
+    id: "SPIRIT_GRASS" /* SPIRIT_GRASS */,
+    name: "\u7075\u8349\xB7\u9752\u82BD",
+    matureSeconds: 60,
+    rarity: "COMMON" /* COMMON */,
+    rarityLabel: "\u51E1\u54C1"
+  },
+  ["SPIRIT_FLOWER" /* SPIRIT_FLOWER */]: {
+    id: "SPIRIT_FLOWER" /* SPIRIT_FLOWER */,
+    name: "\u7075\u82B1\xB7\u7FE0\u854A",
+    matureSeconds: 180,
+    rarity: "COMMON" /* COMMON */,
+    rarityLabel: "\u51E1\u54C1"
+  },
+  ["SPIRIT_VINE" /* SPIRIT_VINE */]: {
+    id: "SPIRIT_VINE" /* SPIRIT_VINE */,
+    name: "\u7075\u85E4\xB7\u78A7\u7EDC",
+    matureSeconds: 300,
+    rarity: "RARE" /* RARE */,
+    rarityLabel: "\u4E0A\u54C1"
+  },
+  ["SPIRIT_FRUIT" /* SPIRIT_FRUIT */]: {
+    id: "SPIRIT_FRUIT" /* SPIRIT_FRUIT */,
+    name: "\u7075\u679C\xB7\u4E39\u971E",
+    matureSeconds: 480,
+    rarity: "RARE" /* RARE */,
+    rarityLabel: "\u4E0A\u54C1"
+  },
+  ["SPIRIT_ORCHID" /* SPIRIT_ORCHID */]: {
+    id: "SPIRIT_ORCHID" /* SPIRIT_ORCHID */,
+    name: "\u5E7D\u5170\xB7\u7D2B\u9704",
+    matureSeconds: 720,
+    rarity: "EPIC" /* EPIC */,
+    rarityLabel: "\u6781\u54C1"
+  },
+  ["SPIRIT_LOTUS" /* SPIRIT_LOTUS */]: {
+    id: "SPIRIT_LOTUS" /* SPIRIT_LOTUS */,
+    name: "\u7075\u83B2\xB7\u9752\u7075",
+    matureSeconds: 900,
+    rarity: "EPIC" /* EPIC */,
+    rarityLabel: "\u6781\u54C1"
+  }
+};
+function getHerbConfigById(id) {
+  const values = Object.values(HerbId);
+  const matched = values.find((value) => value === id);
+  if (!matched) {
+    return null;
+  }
+  return herbConfigs[matched];
+}
 
-export { BASE_CULTIVATION_PER_SECOND as B, MAX_REALM as M, Realm as R, SpiritRoot as S, getRealmMaxCultivation as a, getRealmLabel as b, getSpiritRootMultiplier as c, getRealmMultiplier as d, getRandomSpiritRoot as e, getSpiritRootLabel as f, getNextRealm as g };
+export { BASE_CULTIVATION_PER_SECOND as B, CavePlotStatus as C, MAX_REALM as M, Realm as R, SpiritRoot as S, getNextRealm as a, getRealmMaxCultivation as b, getRealmLabel as c, getSpiritRootMultiplier as d, getRealmMultiplier as e, getRandomSpiritRoot as f, getHerbConfigById as g, getSpiritRootLabel as h };
 //# sourceMappingURL=gameConstants.mjs.map

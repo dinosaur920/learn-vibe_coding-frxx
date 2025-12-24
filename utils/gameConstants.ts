@@ -169,3 +169,99 @@ export function calculateCultivationGainPerSecond(
     getRealmMultiplier(realm)
   );
 }
+
+export enum CavePlotStatus {
+  EMPTY = "EMPTY",
+  GROWING = "GROWING",
+  READY = "READY",
+}
+
+export enum HerbId {
+  SPIRIT_GRASS = "SPIRIT_GRASS",
+  SPIRIT_FLOWER = "SPIRIT_FLOWER",
+  SPIRIT_VINE = "SPIRIT_VINE",
+  SPIRIT_FRUIT = "SPIRIT_FRUIT",
+  SPIRIT_ORCHID = "SPIRIT_ORCHID",
+  SPIRIT_LOTUS = "SPIRIT_LOTUS",
+}
+
+export enum HerbRarity {
+  COMMON = "COMMON",
+  RARE = "RARE",
+  EPIC = "EPIC",
+}
+
+type HerbConfig = {
+  id: HerbId;
+  name: string;
+  matureSeconds: number;
+  rarity: HerbRarity;
+  rarityLabel: string;
+};
+
+const herbConfigs: Record<HerbId, HerbConfig> = {
+  [HerbId.SPIRIT_GRASS]: {
+    id: HerbId.SPIRIT_GRASS,
+    name: "灵草·青芽",
+    matureSeconds: 60,
+    rarity: HerbRarity.COMMON,
+    rarityLabel: "凡品",
+  },
+  [HerbId.SPIRIT_FLOWER]: {
+    id: HerbId.SPIRIT_FLOWER,
+    name: "灵花·翠蕊",
+    matureSeconds: 180,
+    rarity: HerbRarity.COMMON,
+    rarityLabel: "凡品",
+  },
+  [HerbId.SPIRIT_VINE]: {
+    id: HerbId.SPIRIT_VINE,
+    name: "灵藤·碧络",
+    matureSeconds: 300,
+    rarity: HerbRarity.RARE,
+    rarityLabel: "上品",
+  },
+  [HerbId.SPIRIT_FRUIT]: {
+    id: HerbId.SPIRIT_FRUIT,
+    name: "灵果·丹霞",
+    matureSeconds: 480,
+    rarity: HerbRarity.RARE,
+    rarityLabel: "上品",
+  },
+  [HerbId.SPIRIT_ORCHID]: {
+    id: HerbId.SPIRIT_ORCHID,
+    name: "幽兰·紫霄",
+    matureSeconds: 720,
+    rarity: HerbRarity.EPIC,
+    rarityLabel: "极品",
+  },
+  [HerbId.SPIRIT_LOTUS]: {
+    id: HerbId.SPIRIT_LOTUS,
+    name: "灵莲·青灵",
+    matureSeconds: 900,
+    rarity: HerbRarity.EPIC,
+    rarityLabel: "极品",
+  },
+};
+
+export const BASIC_HERB_IDS: HerbId[] = [
+  HerbId.SPIRIT_GRASS,
+  HerbId.SPIRIT_FLOWER,
+  HerbId.SPIRIT_VINE,
+  HerbId.SPIRIT_FRUIT,
+  HerbId.SPIRIT_ORCHID,
+  HerbId.SPIRIT_LOTUS,
+];
+
+export function getHerbConfig(id: HerbId): HerbConfig {
+  return herbConfigs[id];
+}
+
+export function getHerbConfigById(id: string): HerbConfig | null {
+  const values = Object.values(HerbId) as HerbId[];
+  const matched = values.find((value) => value === id);
+  if (!matched) {
+    return null;
+  }
+  return herbConfigs[matched];
+}
