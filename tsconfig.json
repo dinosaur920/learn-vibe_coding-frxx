@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "allowJs": false,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "types": ["node", "nuxt"],
+    "skipLibCheck": true,
+    "baseUrl": "."
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/*.vue"]
+}
+
