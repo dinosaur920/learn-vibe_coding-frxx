@@ -10,20 +10,24 @@
     "start": "nuxt start"
   },
   "dependencies": {
-    "nuxt": "^3.14.0",
     "@pinia/nuxt": "^0.5.0",
-    "pinia": "^2.1.7",
-    "@vant/nuxt": "^1.0.0",
-    "vant": "^4.9.0",
-    "@vueuse/nuxt": "^10.11.0",
-    "@vueuse/core": "^10.11.0",
     "@prisma/client": "^5.20.0",
-    "dayjs": "^1.11.10"
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@vant/nuxt": "^1.0.0",
+    "@vueuse/core": "^10.11.0",
+    "@vueuse/nuxt": "^10.11.0",
+    "bcryptjs": "^3.0.3",
+    "dayjs": "^1.11.10",
+    "jsonwebtoken": "^9.0.3",
+    "nuxt": "^3.14.0",
+    "pinia": "^2.1.7",
+    "vant": "^4.9.0"
   },
   "devDependencies": {
+    "@types/node": "^20.11.0",
     "prisma": "^5.20.0",
     "typescript": "^5.6.0",
-    "@types/node": "^20.11.0",
     "vue-tsc": "^2.1.6"
   }
 }

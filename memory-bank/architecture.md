@@ -46,9 +46,10 @@
 
 - `.env`
   - 保存环境变量。
-  - 当前仅定义：
+  - 关键变量：
     - `DATABASE_URL="file:./dev.db"`：Prisma 指向的 SQLite 数据文件路径。
-  - 与 `prisma/schema.prisma` 中的 `datasource db` 配置配合使用，统一数据库连接入口。
+    - `JWT_SECRET="dev-secret"`：JWT 签名密钥，当前为开发占位值，生产环境需替换为安全随机字符串。
+  - 与 `prisma/schema.prisma` 中的 `datasource db` 配置配合使用，统一数据库连接入口；同时为后端认证模块提供密钥。
 
 ## 3. 前端视图层文件
 
@@ -72,6 +73,18 @@
       - 显示修为进度条。
       - 提供“打坐”、“突破”等交互按钮，并对接后端 API。
 
+- `pages/login.vue`
+  - 登录页面，对应路由 `/login`。
+  - 使用 Vant 的 `van-form`、`van-field`、`van-button` 组件构建账号密码登录表单。
+  - 提交时调用 `stores/player.ts` 中的 `login` 动作，成功后跳转到首页；失败时通过 `showToast` 显示统一错误提示。
+  - 主要职责：完成“进入游戏”的入口，引导已有账号用户快速登录。
+
+- `pages/register.vue`
+  - 注册页面，对应路由 `/register`。
+  - 使用 Vant 表单组件收集账号密码，调用 `stores/player.ts` 中的 `register` 动作创建新用户。
+  - 注册成功后提示玩家并跳转回登录页，形成登录前的简单两步流程。
+  - 主要职责：完成新玩家账号创建，并为后续绑定更多信息（如邮箱）预留空间。
+
 ## 4. 数据访问层与数据库文件
 
 - `prisma/schema.prisma`
@@ -81,33 +94,96 @@
     - `datasource db`：
       - `provider = "sqlite"`：开发阶段使用 SQLite。
       - `url = env("DATABASE_URL")`：从 `.env` 中读取连接字符串。
+    - `model User`：
+      - `username`、`passwordHash`、`email` 等账号凭证字段。
+      - `realm` / `realmLabel`：以字符串存储当前境界的枚举 key 与中文名。
+      - `spiritRoot` / `spiritRootLabel`：以字符串存储灵根类型与展示文案。
+      - `cultivation` / `maxCultivation`：当前修为值及其上限。
+      - `lastCultivateAt`：上次修炼结算时间。
+      - `createdAt` / `updatedAt`：通用审计时间戳。
   - 角色：
     - 作为所有领域模型（User、洞府、行囊等）的单一事实来源。
-    - 后续在第二阶段开始扩展 User 模型与枚举（Realm、SpiritRoot），并通过 `prisma db push` 同步数据库结构。
+    - 当前已完成 User 模型的定义与数据库同步，为后续修炼、突破与洞府功能提供统一用户数据基础。
 
-## 5. 未来文件布局预期（基于实施计划）
+## 5. 后端通用工具与 API 层
+
+- `server/utils/prisma.ts`
+  - 封装 PrismaClient 单例，避免开发环境下热重载导致的多连接问题。
+  - 根据 `NODE_ENV` 配置日志级别，在开发期输出查询与警告便于调试，生产仅保留错误日志。
+
+- `server/utils/auth.ts`
+  - 提供认证相关的底层能力：
+    - `hashPassword` / `verifyPassword`：基于 `bcryptjs` 实现密码哈希与验证，使用固定成本参数保证安全性与性能平衡。
+    - `signAuthToken` / `verifyAuthToken`：使用 `JWT_SECRET` 签发与验证 HS256 JWT，统一包含 `userId` 与过期时间。
+    - `getTokenFromRequest`：从 `Authorization: Bearer` 头或 HttpOnly Cookie `auth_token` 中解析 token。
+    - `setAuthCookie` / `clearAuthCookie`：设置或清除 HttpOnly Cookie，生产环境开启 `secure` 标记。
+  - 角色：所有需要身份校验的 API 的通用依赖，是“账号系统”与后续“挂机修炼”、“洞府”等受保护接口的安全基石。
+
+- `server/utils/response.ts`
+  - 统一约束后端返回结构：
+    - 成功：`{ success: true, data: T }`。
+    - 失败：`{ success: false, code: string, message: string }`。
+  - 角色：为前端提供稳定的错误码与文案，方便 UI 层做统一处理（如 toast、重定向登录）。
+
+- `server/api/user/register.post.ts`
+  - 负责新玩家注册：
+    - 校验用户名与密码必填。
+    - 检查用户名唯一性，冲突时返回 `AUTH_USERNAME_TAKEN`。
+    - 生成密码哈希，随机分配灵根（基于 `utils/gameConstants.ts`），初始化境界为炼气一层，设置修为与上限，并记录 `lastCultivateAt`。
+  - 返回不包含密码哈希的脱敏用户信息。
+
+- `server/api/user/login.post.ts`
+  - 负责账号登录：
+    - 校验凭证并验证密码哈希。
+    - 登录成功后签发 JWT，写入 HttpOnly Cookie，并返回玩家基础信息。
+    - 登录失败时统一返回 `AUTH_INVALID_CREDENTIALS`，隐藏具体失败原因。
+
+- `server/api/user/profile.get.ts`
+  - 受保护接口，用于在前端刷新玩家信息：
+    - 从 Header 或 Cookie 中解析 JWT，验证后根据 `userId` 读取用户。
+    - 未登录、token 无效或用户被删除时返回 `AUTH_UNAUTHORIZED` 或 `USER_NOT_FOUND`。
+  - 角色：为前端 Store 提供“当前登录玩家”的权威数据来源。
+
+## 6. 状态管理层
+
+- `stores/player.ts`
+  - 基于 Pinia 的玩家 Store：
+    - `state`：维护 `playerInfo`（当前登录玩家信息）与预留的 `token` 字段。
+    - `actions`：
+      - `register`：调用注册接口，成功后更新本地玩家信息。
+      - `login`：调用登录接口，依赖服务端 Cookie 持久化 token，仅在前端保存玩家基础信息。
+      - `fetchProfile`：调用 `/api/user/profile` 刷新信息，未授权时清空本地状态。
+      - `logout`：清除本地玩家信息（正式登出接口可在后续阶段扩展）。
+  - 角色：串联认证 API 与界面，作为全局“玩家会话”的单一读写入口。
+
+## 7. 未来文件布局预期（基于实施计划）
 
 > 以下为未来阶段的结构预期，便于后续开发者在阅读本文件时理解即将出现的目录与文件定位。
 
 - `server/api/`
-  - 存放后端 API：
+  - 已实现：
     - `server/api/user/register.post.ts`：用户注册。
     - `server/api/user/login.post.ts`：登录与 JWT 签发。
+    - `server/api/user/profile.get.ts`：获取当前登录玩家信息。
+  - 未来待实现（第三阶段及以后）：
     - `server/api/game/cultivate.post.ts`：修炼结算（挂机 Tick）。
     - `server/api/game/breakthrough.post.ts`：境界突破。
     - `server/api/cave/*.ts`：洞府状态查询、种植、收获。
     - `server/api/inventory/*.ts`：行囊物品查询与更新。
 
 - `stores/`
-  - 存放 Pinia Store：
+  - 已实现：
     - `stores/player.ts`：维护玩家登录状态、基础信息以及与后端 Profile 的同步。
-    - 后续可能增加 `stores/cave.ts`、`stores/inventory.ts` 等模块化 Store。
+  - 未来待实现：
+    - `stores/cave.ts`、`stores/inventory.ts` 等模块化 Store。
 
 - `utils/gameConstants.ts`
-  - 前后端共享的游戏配置：
-    - 境界列表与每层 `maxCultivation`。
-    - 基础修炼速度与灵根/境界系数占位值。
+  - 当前已实现：
+    - 炼气一层到炼气十层的境界配置与 `maxCultivation`。
+    - 灵根枚举与中文展示文案。
+    - 用于注册时随机生成灵根的工具函数。
+  - 未来扩展：
+    - 核心修炼数值（基础修炼速度、灵根/境界系数）。
     - 洞府灵草配置（成熟时间、物品 ID、物品类型等）。
 
 随着后续阶段推进，本文件将继续扩充每个新增模块的职责说明，以及它们之间的调用关系与数据流向。  
-

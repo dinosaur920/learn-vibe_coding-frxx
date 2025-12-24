@@ -3,8 +3,11 @@ import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getResponseStatusText } from 'file://D:/workSpace/demo1222/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, setCookie, getCookie, getResponseStatusText } from 'file://D:/workSpace/demo1222/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://D:/workSpace/demo1222/node_modules/@vue/shared/dist/shared.cjs.js';
+import { PrismaClient } from 'file://D:/workSpace/demo1222/node_modules/@prisma/client/default.js';
+import jwt from 'file://D:/workSpace/demo1222/node_modules/jsonwebtoken/index.js';
+import bcrypt from 'file://D:/workSpace/demo1222/node_modules/bcryptjs/index.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://D:/workSpace/demo1222/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://D:/workSpace/demo1222/node_modules/ufo/dist/index.mjs';
 import process$1 from 'node:process';
@@ -1861,10 +1864,16 @@ async function getIslandContext(event) {
   return ctx;
 }
 
+const _lazy_sUIvGF = () => Promise.resolve().then(function () { return login_post$1; });
+const _lazy_za58kY = () => Promise.resolve().then(function () { return profile_get$1; });
+const _lazy_UmTuvh = () => Promise.resolve().then(function () { return register_post$1; });
 const _lazy_V85mOn = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
   { route: '', handler: _Ok3CW6, lazy: false, middleware: true, method: undefined },
+  { route: '/api/user/login', handler: _lazy_sUIvGF, lazy: true, middleware: false, method: "post" },
+  { route: '/api/user/profile', handler: _lazy_za58kY, lazy: true, middleware: false, method: "get" },
+  { route: '/api/user/register', handler: _lazy_UmTuvh, lazy: true, middleware: false, method: "post" },
   { route: '/__nuxt_error', handler: _lazy_V85mOn, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: _SxA8c9, lazy: false, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_V85mOn, lazy: true, middleware: false, method: undefined }
@@ -2196,6 +2205,332 @@ const styles = {};
 const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: styles
+}, Symbol.toStringTag, { value: 'Module' }));
+
+var _a;
+const prisma = (_a = globalThis.prisma) != null ? _a : new PrismaClient({
+  log: ["query", "error", "warn"] 
+});
+{
+  globalThis.prisma = prisma;
+}
+
+function createErrorResponse(code, message) {
+  return {
+    success: false,
+    code,
+    message
+  };
+}
+function createSuccessResponse(data) {
+  return {
+    success: true,
+    data
+  };
+}
+
+const authCookieName = "auth_token";
+const jwtSecret = process.env.JWT_SECRET || "dev-secret";
+const jwtExpiresIn = "7d";
+const bcryptSaltRounds = 12;
+async function hashPassword(password) {
+  const salt = await bcrypt.genSalt(bcryptSaltRounds);
+  return bcrypt.hash(password, salt);
+}
+function verifyPassword(password, hash) {
+  return bcrypt.compare(password, hash);
+}
+function signAuthToken(userId) {
+  const payload = { userId };
+  return jwt.sign(payload, jwtSecret, { algorithm: "HS256", expiresIn: jwtExpiresIn });
+}
+function verifyAuthToken(token) {
+  try {
+    const decoded = jwt.verify(token, jwtSecret);
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+function getTokenFromRequest(event) {
+  const authHeader = getRequestHeader(event, "authorization");
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader.slice("Bearer ".length);
+  }
+  const cookieToken = getCookie(event, authCookieName);
+  if (cookieToken && typeof cookieToken === "string" && cookieToken.length > 0) {
+    return cookieToken;
+  }
+  return null;
+}
+function setAuthCookie(event, token) {
+  setCookie(event, authCookieName, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7
+  });
+}
+
+function sanitizeUser$2(user) {
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    realm: user.realm,
+    realmLabel: user.realmLabel,
+    cultivation: user.cultivation,
+    maxCultivation: user.maxCultivation,
+    spiritRoot: user.spiritRoot,
+    spiritRootLabel: user.spiritRootLabel
+  };
+}
+const login_post = defineEventHandler(async (event) => {
+  var _a, _b;
+  try {
+    const body = await readBody(event);
+    const username = (_a = body.username) == null ? void 0 : _a.trim();
+    const password = (_b = body.password) == null ? void 0 : _b.trim();
+    if (!username || !password) {
+      setResponseStatus(event, 400);
+      return createErrorResponse("VALIDATION_ERROR", "\u8BF7\u8F93\u5165\u8D26\u53F7\u548C\u5BC6\u7801");
+    }
+    const user = await prisma.user.findUnique({
+      where: {
+        username
+      }
+    });
+    if (!user) {
+      setResponseStatus(event, 401);
+      return createErrorResponse("AUTH_INVALID_CREDENTIALS", "\u8D26\u53F7\u6216\u5BC6\u7801\u9519\u8BEF");
+    }
+    const valid = await verifyPassword(password, user.passwordHash);
+    if (!valid) {
+      setResponseStatus(event, 401);
+      return createErrorResponse("AUTH_INVALID_CREDENTIALS", "\u8D26\u53F7\u6216\u5BC6\u7801\u9519\u8BEF");
+    }
+    const token = signAuthToken(user.id);
+    setAuthCookie(event, token);
+    return createSuccessResponse(sanitizeUser$2(user));
+  } catch (error) {
+    setResponseStatus(event, 500);
+    return createErrorResponse(
+      "INTERNAL_SERVER_ERROR",
+      "\u670D\u52A1\u5668\u5F00\u5C0F\u5DEE\u4E86\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5"
+    );
+  }
+});
+
+const login_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: login_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+function sanitizeUser$1(user) {
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    realm: user.realm,
+    realmLabel: user.realmLabel,
+    cultivation: user.cultivation,
+    maxCultivation: user.maxCultivation,
+    spiritRoot: user.spiritRoot,
+    spiritRootLabel: user.spiritRootLabel
+  };
+}
+const profile_get = defineEventHandler(
+  async (event) => {
+    try {
+      const token = getTokenFromRequest(event);
+      if (!token) {
+        setResponseStatus(event, 401);
+        return createErrorResponse("AUTH_UNAUTHORIZED", "\u8BF7\u5148\u767B\u5F55");
+      }
+      const payload = verifyAuthToken(token);
+      if (!payload || !payload.userId) {
+        setResponseStatus(event, 401);
+        return createErrorResponse("AUTH_UNAUTHORIZED", "\u767B\u5F55\u72B6\u6001\u5DF2\u5931\u6548\uFF0C\u8BF7\u91CD\u65B0\u767B\u5F55");
+      }
+      const user = await prisma.user.findUnique({
+        where: {
+          id: payload.userId
+        }
+      });
+      if (!user) {
+        setResponseStatus(event, 404);
+        return createErrorResponse("USER_NOT_FOUND", "\u7528\u6237\u4E0D\u5B58\u5728");
+      }
+      return createSuccessResponse(sanitizeUser$1(user));
+    } catch (error) {
+      setResponseStatus(event, 500);
+      return createErrorResponse("INTERNAL_SERVER_ERROR", "\u670D\u52A1\u5668\u5F00\u5C0F\u5DEE\u4E86\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5");
+    }
+  }
+);
+
+const profile_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: profile_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+var Realm = /* @__PURE__ */ ((Realm2) => {
+  Realm2["QI_1"] = "QI_1";
+  Realm2["QI_2"] = "QI_2";
+  Realm2["QI_3"] = "QI_3";
+  Realm2["QI_4"] = "QI_4";
+  Realm2["QI_5"] = "QI_5";
+  Realm2["QI_6"] = "QI_6";
+  Realm2["QI_7"] = "QI_7";
+  Realm2["QI_8"] = "QI_8";
+  Realm2["QI_9"] = "QI_9";
+  Realm2["QI_10"] = "QI_10";
+  return Realm2;
+})(Realm || {});
+var SpiritRoot = /* @__PURE__ */ ((SpiritRoot2) => {
+  SpiritRoot2["FAKE"] = "FAKE";
+  SpiritRoot2["TRUE"] = "TRUE";
+  SpiritRoot2["HEAVEN"] = "HEAVEN";
+  SpiritRoot2["MUTANT"] = "MUTANT";
+  return SpiritRoot2;
+})(SpiritRoot || {});
+const realmConfigs = {
+  QI_1: {
+    maxCultivation: 100,
+    label: "\u70BC\u6C14\u4E00\u5C42"
+  },
+  QI_2: {
+    maxCultivation: 150,
+    label: "\u70BC\u6C14\u4E8C\u5C42"
+  },
+  QI_3: {
+    maxCultivation: 225,
+    label: "\u70BC\u6C14\u4E09\u5C42"
+  },
+  QI_4: {
+    maxCultivation: 340,
+    label: "\u70BC\u6C14\u56DB\u5C42"
+  },
+  QI_5: {
+    maxCultivation: 510,
+    label: "\u70BC\u6C14\u4E94\u5C42"
+  },
+  QI_6: {
+    maxCultivation: 765,
+    label: "\u70BC\u6C14\u516D\u5C42"
+  },
+  QI_7: {
+    maxCultivation: 1150,
+    label: "\u70BC\u6C14\u4E03\u5C42"
+  },
+  QI_8: {
+    maxCultivation: 1725,
+    label: "\u70BC\u6C14\u516B\u5C42"
+  },
+  QI_9: {
+    maxCultivation: 2590,
+    label: "\u70BC\u6C14\u4E5D\u5C42"
+  },
+  QI_10: {
+    maxCultivation: 3885,
+    label: "\u70BC\u6C14\u5341\u5C42"
+  }
+};
+const spiritRootConfigs = {
+  FAKE: {
+    label: "\u4F2A\u7075\u6839"
+  },
+  TRUE: {
+    label: "\u771F\u7075\u6839"
+  },
+  HEAVEN: {
+    label: "\u5929\u7075\u6839"
+  },
+  MUTANT: {
+    label: "\u53D8\u5F02\u7075\u6839"
+  }
+};
+function getRealmLabel(realm) {
+  return realmConfigs[realm].label;
+}
+function getRealmMaxCultivation(realm) {
+  return realmConfigs[realm].maxCultivation;
+}
+function getSpiritRootLabel(spiritRoot) {
+  return spiritRootConfigs[spiritRoot].label;
+}
+function getRandomSpiritRoot() {
+  const values = Object.values(SpiritRoot);
+  const index = Math.floor(Math.random() * values.length);
+  return values[index];
+}
+
+function sanitizeUser(user) {
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    realm: user.realm,
+    realmLabel: user.realmLabel,
+    cultivation: user.cultivation,
+    maxCultivation: user.maxCultivation,
+    spiritRoot: user.spiritRoot,
+    spiritRootLabel: user.spiritRootLabel
+  };
+}
+const register_post = defineEventHandler(async (event) => {
+  var _a, _b;
+  try {
+    const body = await readBody(event);
+    const username = (_a = body.username) == null ? void 0 : _a.trim();
+    const password = (_b = body.password) == null ? void 0 : _b.trim();
+    if (!username || !password) {
+      setResponseStatus(event, 400);
+      return createErrorResponse("VALIDATION_ERROR", "\u8BF7\u8F93\u5165\u8D26\u53F7\u548C\u5BC6\u7801");
+    }
+    const existing = await prisma.user.findUnique({
+      where: {
+        username
+      }
+    });
+    if (existing) {
+      setResponseStatus(event, 409);
+      return createErrorResponse("AUTH_USERNAME_TAKEN", "\u8BE5\u8D26\u53F7\u5DF2\u88AB\u6CE8\u518C");
+    }
+    const passwordHash = await hashPassword(password);
+    const realm = Realm.QI_1;
+    const spiritRoot = getRandomSpiritRoot();
+    const realmLabel = getRealmLabel(realm);
+    const maxCultivation = getRealmMaxCultivation(realm);
+    const spiritRootLabel = getSpiritRootLabel(spiritRoot);
+    const user = await prisma.user.create({
+      data: {
+        username,
+        passwordHash,
+        realm,
+        realmLabel,
+        cultivation: 0,
+        maxCultivation,
+        spiritRoot,
+        spiritRootLabel,
+        lastCultivateAt: /* @__PURE__ */ new Date()
+      }
+    });
+    setResponseStatus(event, 201);
+    return createSuccessResponse(sanitizeUser(user));
+  } catch (error) {
+    setResponseStatus(event, 500);
+    return createErrorResponse(
+      "INTERNAL_SERVER_ERROR",
+      "\u670D\u52A1\u5668\u5F00\u5C0F\u5DEE\u4E86\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5"
+    );
+  }
+});
+
+const register_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: register_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
 function renderPayloadResponse(ssrContext) {
