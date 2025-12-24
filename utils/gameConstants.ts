@@ -102,3 +102,44 @@ export function getRandomSpiritRoot() {
   const index = Math.floor(Math.random() * values.length);
   return values[index];
 }
+
+export const BASE_CULTIVATION_PER_SECOND = 1;
+
+const spiritRootMultipliers: Record<SpiritRoot, number> = {
+  FAKE: 0.7,
+  TRUE: 1,
+  HEAVEN: 1.3,
+  MUTANT: 1.1
+};
+
+const realmMultipliers: Record<Realm, number> = {
+  QI_1: 1,
+  QI_2: 1.05,
+  QI_3: 1.1,
+  QI_4: 1.15,
+  QI_5: 1.2,
+  QI_6: 1.25,
+  QI_7: 1.3,
+  QI_8: 1.35,
+  QI_9: 1.4,
+  QI_10: 1.45
+};
+
+export function getSpiritRootMultiplier(spiritRoot: SpiritRoot) {
+  return spiritRootMultipliers[spiritRoot] ?? 1;
+}
+
+export function getRealmMultiplier(realm: Realm) {
+  return realmMultipliers[realm] ?? 1;
+}
+
+export function calculateCultivationGainPerSecond(
+  spiritRoot: SpiritRoot,
+  realm: Realm
+) {
+  return (
+    BASE_CULTIVATION_PER_SECOND *
+    getSpiritRootMultiplier(spiritRoot) *
+    getRealmMultiplier(realm)
+  );
+}

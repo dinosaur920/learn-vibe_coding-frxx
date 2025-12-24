@@ -3,7 +3,7 @@ import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, setCookie, getCookie, getResponseStatusText } from 'file://D:/workSpace/demo1222/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getCookie, setCookie, getResponseStatusText } from 'file://D:/workSpace/demo1222/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://D:/workSpace/demo1222/node_modules/@vue/shared/dist/shared.cjs.js';
 import { PrismaClient } from 'file://D:/workSpace/demo1222/node_modules/@prisma/client/default.js';
 import jwt from 'file://D:/workSpace/demo1222/node_modules/jsonwebtoken/index.js';
@@ -1454,7 +1454,22 @@ const plugins = [
 _s0TSjk9v3jkQUxoLSVeNgXAB6NB2fYnsUuiIE_dt2A
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"17d3d-O1/6i2S/5mxQkjtqAW2kxnSYNA4\"",
+    "mtime": "2025-12-24T07:18:32.468Z",
+    "size": 97597,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"5c074-2GMMi06PJRjxB3XYrjcT7wT93I0\"",
+    "mtime": "2025-12-24T07:18:32.468Z",
+    "size": 376948,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -1864,6 +1879,7 @@ async function getIslandContext(event) {
   return ctx;
 }
 
+const _lazy_0ZhrCi = () => Promise.resolve().then(function () { return cultivate_post$1; });
 const _lazy_sUIvGF = () => Promise.resolve().then(function () { return login_post$1; });
 const _lazy_za58kY = () => Promise.resolve().then(function () { return profile_get$1; });
 const _lazy_UmTuvh = () => Promise.resolve().then(function () { return register_post$1; });
@@ -1871,6 +1887,7 @@ const _lazy_V85mOn = () => Promise.resolve().then(function () { return renderer$
 
 const handlers = [
   { route: '', handler: _Ok3CW6, lazy: false, middleware: true, method: undefined },
+  { route: '/api/game/cultivate', handler: _lazy_0ZhrCi, lazy: true, middleware: false, method: "post" },
   { route: '/api/user/login', handler: _lazy_sUIvGF, lazy: true, middleware: false, method: "post" },
   { route: '/api/user/profile', handler: _lazy_za58kY, lazy: true, middleware: false, method: "get" },
   { route: '/api/user/register', handler: _lazy_UmTuvh, lazy: true, middleware: false, method: "post" },
@@ -2208,11 +2225,11 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
 }, Symbol.toStringTag, { value: 'Module' }));
 
 var _a;
-const prisma = (_a = globalThis.prisma) != null ? _a : new PrismaClient({
+const prisma = (_a = globalThis.__prismaClient) != null ? _a : new PrismaClient({
   log: ["query", "error", "warn"] 
 });
 {
-  globalThis.prisma = prisma;
+  globalThis.__prismaClient = prisma;
 }
 
 function createErrorResponse(code, message) {
@@ -2272,6 +2289,234 @@ function setAuthCookie(event, token) {
     maxAge: 60 * 60 * 24 * 7
   });
 }
+
+var Realm = /* @__PURE__ */ ((Realm2) => {
+  Realm2["QI_1"] = "QI_1";
+  Realm2["QI_2"] = "QI_2";
+  Realm2["QI_3"] = "QI_3";
+  Realm2["QI_4"] = "QI_4";
+  Realm2["QI_5"] = "QI_5";
+  Realm2["QI_6"] = "QI_6";
+  Realm2["QI_7"] = "QI_7";
+  Realm2["QI_8"] = "QI_8";
+  Realm2["QI_9"] = "QI_9";
+  Realm2["QI_10"] = "QI_10";
+  return Realm2;
+})(Realm || {});
+var SpiritRoot = /* @__PURE__ */ ((SpiritRoot2) => {
+  SpiritRoot2["FAKE"] = "FAKE";
+  SpiritRoot2["TRUE"] = "TRUE";
+  SpiritRoot2["HEAVEN"] = "HEAVEN";
+  SpiritRoot2["MUTANT"] = "MUTANT";
+  return SpiritRoot2;
+})(SpiritRoot || {});
+const realmConfigs = {
+  QI_1: {
+    maxCultivation: 100,
+    label: "\u70BC\u6C14\u4E00\u5C42"
+  },
+  QI_2: {
+    maxCultivation: 150,
+    label: "\u70BC\u6C14\u4E8C\u5C42"
+  },
+  QI_3: {
+    maxCultivation: 225,
+    label: "\u70BC\u6C14\u4E09\u5C42"
+  },
+  QI_4: {
+    maxCultivation: 340,
+    label: "\u70BC\u6C14\u56DB\u5C42"
+  },
+  QI_5: {
+    maxCultivation: 510,
+    label: "\u70BC\u6C14\u4E94\u5C42"
+  },
+  QI_6: {
+    maxCultivation: 765,
+    label: "\u70BC\u6C14\u516D\u5C42"
+  },
+  QI_7: {
+    maxCultivation: 1150,
+    label: "\u70BC\u6C14\u4E03\u5C42"
+  },
+  QI_8: {
+    maxCultivation: 1725,
+    label: "\u70BC\u6C14\u516B\u5C42"
+  },
+  QI_9: {
+    maxCultivation: 2590,
+    label: "\u70BC\u6C14\u4E5D\u5C42"
+  },
+  QI_10: {
+    maxCultivation: 3885,
+    label: "\u70BC\u6C14\u5341\u5C42"
+  }
+};
+const spiritRootConfigs = {
+  FAKE: {
+    label: "\u4F2A\u7075\u6839"
+  },
+  TRUE: {
+    label: "\u771F\u7075\u6839"
+  },
+  HEAVEN: {
+    label: "\u5929\u7075\u6839"
+  },
+  MUTANT: {
+    label: "\u53D8\u5F02\u7075\u6839"
+  }
+};
+function getRealmLabel(realm) {
+  return realmConfigs[realm].label;
+}
+function getRealmMaxCultivation(realm) {
+  return realmConfigs[realm].maxCultivation;
+}
+function getSpiritRootLabel(spiritRoot) {
+  return spiritRootConfigs[spiritRoot].label;
+}
+function getRandomSpiritRoot() {
+  const values = Object.values(SpiritRoot);
+  const index = Math.floor(Math.random() * values.length);
+  return values[index];
+}
+const BASE_CULTIVATION_PER_SECOND = 1;
+const spiritRootMultipliers = {
+  FAKE: 0.7,
+  TRUE: 1,
+  HEAVEN: 1.3,
+  MUTANT: 1.1
+};
+const realmMultipliers = {
+  QI_1: 1,
+  QI_2: 1.05,
+  QI_3: 1.1,
+  QI_4: 1.15,
+  QI_5: 1.2,
+  QI_6: 1.25,
+  QI_7: 1.3,
+  QI_8: 1.35,
+  QI_9: 1.4,
+  QI_10: 1.45
+};
+function getSpiritRootMultiplier(spiritRoot) {
+  var _a;
+  return (_a = spiritRootMultipliers[spiritRoot]) != null ? _a : 1;
+}
+function getRealmMultiplier(realm) {
+  var _a;
+  return (_a = realmMultipliers[realm]) != null ? _a : 1;
+}
+
+function sanitizeUser$3(user) {
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    realm: user.realm,
+    realmLabel: user.realmLabel,
+    cultivation: user.cultivation,
+    maxCultivation: user.maxCultivation,
+    spiritRoot: user.spiritRoot,
+    spiritRootLabel: user.spiritRootLabel
+  };
+}
+function toRealm(value) {
+  const realmValues = Object.values(Realm);
+  if (realmValues.includes(value)) {
+    return value;
+  }
+  return null;
+}
+function toSpiritRoot(value) {
+  const rootValues = Object.values(SpiritRoot);
+  if (rootValues.includes(value)) {
+    return value;
+  }
+  return null;
+}
+const cultivate_post = defineEventHandler(async (event) => {
+  var _a, _b, _c;
+  try {
+    const token = getTokenFromRequest(event);
+    if (!token) {
+      setResponseStatus(event, 401);
+      return createErrorResponse("AUTH_UNAUTHORIZED", "\u8BF7\u5148\u767B\u5F55");
+    }
+    const payload = verifyAuthToken(token);
+    if (!payload || !payload.userId) {
+      setResponseStatus(event, 401);
+      return createErrorResponse(
+        "AUTH_UNAUTHORIZED",
+        "\u767B\u5F55\u72B6\u6001\u5DF2\u5931\u6548\uFF0C\u8BF7\u91CD\u65B0\u767B\u5F55"
+      );
+    }
+    const user = await prisma.user.findUnique({
+      where: {
+        id: payload.userId
+      }
+    });
+    if (!user) {
+      setResponseStatus(event, 404);
+      return createErrorResponse("USER_NOT_FOUND", "\u7528\u6237\u4E0D\u5B58\u5728");
+    }
+    const now = /* @__PURE__ */ new Date();
+    const lastCultivateAt = (_a = user.lastCultivateAt) != null ? _a : now;
+    const elapsedMs = now.getTime() - lastCultivateAt.getTime();
+    const elapsedSeconds = Math.floor(elapsedMs / 1e3);
+    if (elapsedSeconds <= 0 || user.cultivation >= user.maxCultivation) {
+      const updatedUser2 = await prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          lastCultivateAt: now
+        }
+      });
+      return createSuccessResponse(sanitizeUser$3(updatedUser2));
+    }
+    const realm = (_b = toRealm(user.realm)) != null ? _b : Realm.QI_1;
+    const spiritRoot = (_c = toSpiritRoot(user.spiritRoot)) != null ? _c : SpiritRoot.TRUE;
+    const gainPerSecond = BASE_CULTIVATION_PER_SECOND * getSpiritRootMultiplier(spiritRoot) * getRealmMultiplier(realm);
+    const gain = Math.floor(gainPerSecond * elapsedSeconds);
+    if (gain <= 0) {
+      const updatedUser2 = await prisma.user.update({
+        where: {
+          id: user.id
+        },
+        data: {
+          lastCultivateAt: now
+        }
+      });
+      return createSuccessResponse(sanitizeUser$3(updatedUser2));
+    }
+    const newCultivation = Math.min(
+      user.cultivation + gain,
+      user.maxCultivation
+    );
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        cultivation: newCultivation,
+        lastCultivateAt: now
+      }
+    });
+    return createSuccessResponse(sanitizeUser$3(updatedUser));
+  } catch (error) {
+    setResponseStatus(event, 500);
+    return createErrorResponse(
+      "INTERNAL_SERVER_ERROR",
+      "\u670D\u52A1\u5668\u5F00\u5C0F\u5DEE\u4E86\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5"
+    );
+  }
+});
+
+const cultivate_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: cultivate_post
+}, Symbol.toStringTag, { value: 'Module' }));
 
 function sanitizeUser$2(user) {
   return {
@@ -2374,97 +2619,6 @@ const profile_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   __proto__: null,
   default: profile_get
 }, Symbol.toStringTag, { value: 'Module' }));
-
-var Realm = /* @__PURE__ */ ((Realm2) => {
-  Realm2["QI_1"] = "QI_1";
-  Realm2["QI_2"] = "QI_2";
-  Realm2["QI_3"] = "QI_3";
-  Realm2["QI_4"] = "QI_4";
-  Realm2["QI_5"] = "QI_5";
-  Realm2["QI_6"] = "QI_6";
-  Realm2["QI_7"] = "QI_7";
-  Realm2["QI_8"] = "QI_8";
-  Realm2["QI_9"] = "QI_9";
-  Realm2["QI_10"] = "QI_10";
-  return Realm2;
-})(Realm || {});
-var SpiritRoot = /* @__PURE__ */ ((SpiritRoot2) => {
-  SpiritRoot2["FAKE"] = "FAKE";
-  SpiritRoot2["TRUE"] = "TRUE";
-  SpiritRoot2["HEAVEN"] = "HEAVEN";
-  SpiritRoot2["MUTANT"] = "MUTANT";
-  return SpiritRoot2;
-})(SpiritRoot || {});
-const realmConfigs = {
-  QI_1: {
-    maxCultivation: 100,
-    label: "\u70BC\u6C14\u4E00\u5C42"
-  },
-  QI_2: {
-    maxCultivation: 150,
-    label: "\u70BC\u6C14\u4E8C\u5C42"
-  },
-  QI_3: {
-    maxCultivation: 225,
-    label: "\u70BC\u6C14\u4E09\u5C42"
-  },
-  QI_4: {
-    maxCultivation: 340,
-    label: "\u70BC\u6C14\u56DB\u5C42"
-  },
-  QI_5: {
-    maxCultivation: 510,
-    label: "\u70BC\u6C14\u4E94\u5C42"
-  },
-  QI_6: {
-    maxCultivation: 765,
-    label: "\u70BC\u6C14\u516D\u5C42"
-  },
-  QI_7: {
-    maxCultivation: 1150,
-    label: "\u70BC\u6C14\u4E03\u5C42"
-  },
-  QI_8: {
-    maxCultivation: 1725,
-    label: "\u70BC\u6C14\u516B\u5C42"
-  },
-  QI_9: {
-    maxCultivation: 2590,
-    label: "\u70BC\u6C14\u4E5D\u5C42"
-  },
-  QI_10: {
-    maxCultivation: 3885,
-    label: "\u70BC\u6C14\u5341\u5C42"
-  }
-};
-const spiritRootConfigs = {
-  FAKE: {
-    label: "\u4F2A\u7075\u6839"
-  },
-  TRUE: {
-    label: "\u771F\u7075\u6839"
-  },
-  HEAVEN: {
-    label: "\u5929\u7075\u6839"
-  },
-  MUTANT: {
-    label: "\u53D8\u5F02\u7075\u6839"
-  }
-};
-function getRealmLabel(realm) {
-  return realmConfigs[realm].label;
-}
-function getRealmMaxCultivation(realm) {
-  return realmConfigs[realm].maxCultivation;
-}
-function getSpiritRootLabel(spiritRoot) {
-  return spiritRootConfigs[spiritRoot].label;
-}
-function getRandomSpiritRoot() {
-  const values = Object.values(SpiritRoot);
-  const index = Math.floor(Math.random() * values.length);
-  return values[index];
-}
 
 function sanitizeUser(user) {
   return {

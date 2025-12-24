@@ -103,10 +103,33 @@ export const usePlayerStore = defineStore("player", {
 
       this.playerInfo = data.value.data
     },
+    async cultivate() {
+      const { data, error } = await useFetch<SuccessResponse<PlayerInfo> | ErrorResponse>("/api/game/cultivate", {
+        method: "POST"
+      })
+
+      if (error.value) {
+        throw error.value
+      }
+
+      if (!data.value) {
+        throw new Error("修炼失败")
+      }
+
+      if (!data.value.success) {
+        if (data.value.code === "AUTH_UNAUTHORIZED") {
+          this.playerInfo = null
+          this.token = null
+          return
+        }
+        throw new Error(data.value.message)
+      }
+
+      this.playerInfo = data.value.data
+    },
     logout() {
       this.playerInfo = null
       this.token = null
     }
   }
 })
-

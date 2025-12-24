@@ -58,20 +58,16 @@
   - 使用 `<NuxtLayout>` + `<NuxtPage>` 结构：
     - `<NuxtLayout>`：后续可配置默认布局、底部 TabBar 等。
     - `<NuxtPage>`：根据路由渲染具体页面内容。
-  - 目前包含一个 Vant 的 `<van-button type="primary">Test</van-button>`：
-    - 用于验证 Vant 模块是否正确注册、样式是否加载成功，以及移动端 UI 渲染链路是否畅通。
-  - 后续计划：
-    - 将底部导航（修炼 / 洞府 / 行囊）放入默认布局组件 `layouts/default.vue`。
+  - 当前用于挂载全局布局与页面，后续 TabBar 会迁移到 `layouts/default.vue` 中。
 
 - `pages/index.vue`
-  - 默认首页路由 `/` 对应的页面。
+  - 默认首页路由 `/` 对应的“修炼面板”页面。
   - 当前功能：
-    - 展示游戏标题文本（例如“凡人修仙传·掌上仙途”），作为项目启动与路由配置无误的验证点。
-  - 后续演进：
-    - 按实施计划第三、四阶段，将此页面演进为“修炼面板”：
-      - 显示玩家基础信息（境界、灵根）。
-      - 显示修为进度条。
-      - 提供“打坐”、“突破”等交互按钮，并对接后端 API。
+    - 展示玩家基础信息：道号、境界（`realmLabel`）、灵根（`spiritRootLabel`）。
+    - 展示修为进度条：基于 `cultivation / maxCultivation` 计算 `van-progress` 百分比。
+    - 提供“打坐修炼”按钮：点击时调用玩家 Store 的 `cultivate` 动作，对接后端修炼结算 API。
+    - 提供“开始挂机 / 暂停挂机”按钮：使用 `useIntervalFn` 每秒轮询一次修炼接口，模拟挂机修炼。
+    - 未登录时显示引导文案及跳转按钮，指向 `/login`。
 
 - `pages/login.vue`
   - 登录页面，对应路由 `/login`。
@@ -144,6 +140,16 @@
     - 未登录、token 无效或用户被删除时返回 `AUTH_UNAUTHORIZED` 或 `USER_NOT_FOUND`。
   - 角色：为前端 Store 提供“当前登录玩家”的权威数据来源。
 
+- `server/api/game/cultivate.post.ts`
+  - 负责修炼结算（挂机 Tick），基于真实时间差一次性结算修为：
+    - 从请求中读取 JWT，验证后获取当前用户。
+    - 读取用户的 `realm`、`spiritRoot`、`cultivation`、`maxCultivation` 与 `lastCultivateAt`。
+    - 计算当前时间与 `lastCultivateAt` 之间的秒数，得到本次应结算的修炼时长。
+    - 使用基础修炼速度 × 灵根系数 × 境界系数 × 时间差，计算修为增量，并限制不超过当前境界的 `maxCultivation`。
+    - 更新数据库中的 `cultivation` 和 `lastCultivateAt`，返回更新后的玩家状态。
+  - 特点：
+    - 不依赖后台定时任务，采用“按需结算 + 离线补算”的方式，在玩家触发修炼接口时一次性结算离线期间修为。
+
 ## 6. 状态管理层
 
 - `stores/player.ts`
@@ -153,8 +159,9 @@
       - `register`：调用注册接口，成功后更新本地玩家信息。
       - `login`：调用登录接口，依赖服务端 Cookie 持久化 token，仅在前端保存玩家基础信息。
       - `fetchProfile`：调用 `/api/user/profile` 刷新信息，未授权时清空本地状态。
+      - `cultivate`：调用 `/api/game/cultivate` 触发后端修炼结算，将返回的最新玩家状态写回 `playerInfo`，未授权时清空本地状态。
       - `logout`：清除本地玩家信息（正式登出接口可在后续阶段扩展）。
-  - 角色：串联认证 API 与界面，作为全局“玩家会话”的单一读写入口。
+  - 角色：串联认证 API、修炼结算 API 与界面，作为全局“玩家会话与修炼状态”的单一读写入口。
 
 ## 7. 未来文件布局预期（基于实施计划）
 
@@ -165,8 +172,8 @@
     - `server/api/user/register.post.ts`：用户注册。
     - `server/api/user/login.post.ts`：登录与 JWT 签发。
     - `server/api/user/profile.get.ts`：获取当前登录玩家信息。
-  - 未来待实现（第三阶段及以后）：
-    - `server/api/game/cultivate.post.ts`：修炼结算（挂机 Tick）。
+    - `server/api/game/cultivate.post.ts`：修炼结算（挂机 Tick），提供挂机与离线修炼的后端结算能力。
+  - 未来待实现（后续阶段）：
     - `server/api/game/breakthrough.post.ts`：境界突破。
     - `server/api/cave/*.ts`：洞府状态查询、种植、收获。
     - `server/api/inventory/*.ts`：行囊物品查询与更新。
@@ -182,8 +189,14 @@
     - 炼气一层到炼气十层的境界配置与 `maxCultivation`。
     - 灵根枚举与中文展示文案。
     - 用于注册时随机生成灵根的工具函数。
+    - 修炼相关数值配置：
+      - `BASE_CULTIVATION_PER_SECOND`：基础每秒修为增长值。
+      - 灵根系数（伪灵根 / 真灵根 / 天灵根 / 变异灵根），用于放大或削弱修炼速度。
+      - 境界系数（炼气一层到炼气十层），体现境界越高修炼越难。
+    - 辅助函数：
+      - `getSpiritRootMultiplier` / `getRealmMultiplier`：按枚举获取对应系数。
+      - `calculateCultivationGainPerSecond`：基于基础速度与两类系数计算单位时间修为增量。
   - 未来扩展：
-    - 核心修炼数值（基础修炼速度、灵根/境界系数）。
     - 洞府灵草配置（成熟时间、物品 ID、物品类型等）。
 
 随着后续阶段推进，本文件将继续扩充每个新增模块的职责说明，以及它们之间的调用关系与数据流向。  

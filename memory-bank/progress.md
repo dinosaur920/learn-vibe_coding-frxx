@@ -25,4 +25,25 @@
 - 新增登录与注册页面：
   - `pages/login.vue`：基于 Vant 表单与输入组件实现账号密码登录 UI，提交时调用 `playerStore.login`，成功后跳转首页，失败通过 `showToast` 提示。  
   - `pages/register.vue`：实现注册表单，调用 `playerStore.register` 完成账号创建，成功后提示并跳转登录页。  
-- 通过本地手动测试（页面与接口调用）验证注册、登录、Profile 查询与 Cookie 管理均按设计运行，完成实施计划第二阶段全部验收项，仅在文档层面保留第三阶段为后续迭代任务，未编写任何第三阶段代码。
+- 通过本地手动测试（页面与接口调用）验证注册、登录、Profile 查询与 Cookie 管理均按设计运行，完成实施计划第二阶段全部验收项。
+
+## 2025-12-24 - 第三阶段：核心玩法 - 修炼循环
+
+- 扩展游戏数值配置：在 `utils/gameConstants.ts` 中新增修炼相关常量与工具函数：
+  - `BASE_CULTIVATION_PER_SECOND` 基础每秒修为增长值。
+  - 灵根系数与境界系数映射，分别影响不同灵根与境界下的修炼速度。
+  - `calculateCultivationGainPerSecond` 等工具，用于在后端统一计算单位时间修为增量。  
+- 实现修炼结算后端 API：`server/api/game/cultivate.post.ts`：
+  - 从 JWT 中解析当前用户，读取 `realm`、`spiritRoot`、`cultivation`、`maxCultivation` 与 `lastCultivateAt`。
+  - 根据当前时间与 `lastCultivateAt` 的秒级时间差，结合基础速度与两类系数计算修为增量，并限制不超过 `maxCultivation`。
+  - 采用“按需结算 + 离线补算”模式：仅在调用修炼接口时进行结算，但会一次性补算离线期间的修为。  
+- 扩展玩家 Store：在 `stores/player.ts` 中新增 `cultivate` 动作：
+  - 调用 `/api/game/cultivate`，按统一返回结构处理成功与错误。
+  - 未授权时清空本地 `playerInfo`，便于前端跳转登录。  
+- 将首页升级为“修炼面板”：`pages/index.vue`：
+  - 展示玩家基础信息（道号、境界、灵根）和修为进度条（基于 `cultivation / maxCultivation`）。
+  - 提供“打坐修炼”按钮，手动触发一次修炼结算。
+  - 使用 `useIntervalFn` 实现挂机修炼开关，每秒自动调用一次修炼接口，并在组件卸载时停止轮询。  
+- 通过实际页面操作完成第三阶段功能验证：
+  - 注册/登录后进入首页，可以看到修为随“打坐修炼”与挂机开关稳定增长。
+  - 多次刷新页面与重新登录，修为数值保持一致，且长时间不登录后再次进入时，会在首次结算时一次补算离线期间修为。
